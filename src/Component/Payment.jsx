@@ -4,6 +4,10 @@ import toast from "react-hot-toast";
 import { jsPDF } from "jspdf";
 
 export const Payment = () => {
+  useEffect(() => {
+    document.title = "Eventopia"; // Browser tab title
+  }, []);
+
   const location = useLocation();
   const navigate = useNavigate();
   const { event, formData } = location.state || {};
@@ -12,13 +16,15 @@ export const Payment = () => {
   const [receiptDetails, setReceiptDetails] = useState(null);
 
   const amount = 1 * 100; // in paise
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
   useEffect(() => {
-    fetch("http://localhost:5000/get-razorpay-key")
+    // Fetch Razorpay key from backend (works locally or on deployed backend)
+    fetch(`${BACKEND_URL}/get-razorpay-key`)
       .then((res) => res.json())
       .then((data) => setRazorpayKey(data.key))
       .catch(() => toast.error("Failed to load Razorpay key"));
-  }, []);
+  }, [BACKEND_URL]);
 
   if (!event || !formData) {
     return <p className="text-center mt-10">No payment data found.</p>;
@@ -81,7 +87,7 @@ export const Payment = () => {
     }
 
     try {
-      const orderResponse = await fetch("http://localhost:5000/create-order", {
+      const orderResponse = await fetch(`${BACKEND_URL}/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount }),
@@ -102,7 +108,7 @@ export const Payment = () => {
           contact: formData.phone,
         },
         handler: async function (response) {
-          const verifyResponse = await fetch("http://localhost:5000/verify-payment", {
+          const verifyResponse = await fetch(`${BACKEND_URL}/verify-payment`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(response),
