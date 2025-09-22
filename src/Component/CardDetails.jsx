@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { clubs } from "../data";
 import { ParticipationForm } from "./ParticipationForm";
 
-export const Card_Details = () => {
+export const CardDetails = () => {
   const { eventId } = useParams();
   const event = clubs
     .flatMap((club) => club.events)

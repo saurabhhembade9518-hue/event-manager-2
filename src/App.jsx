@@ -4,8 +4,8 @@ import { Navbar } from "./Component/Navbar";
 import { Footer } from "./Component/Footer";
 import {Home} from "./Component/Home";
 import { Events } from "./Component/Events";
-import { Card_Details } from "./Component/Card_Details";
-import { AllEvents } from "./Component/All_Events";
+import { CardDetails } from "./Component/CardDetails";
+import { AllEvents } from "./Component/AllEvents";
 import {Payment} from "./Component/Payment"; 
 
 const App = () => {
@@ -16,7 +16,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/events/:clubId" element={<Events />} />
-          <Route path="/card_details/:eventId" element={<Card_Details />} />
+          <Route path="/card_details/:eventId" element={<CardDetails />} />
           <Route path="/events" element= {<AllEvents/>}/>
           <Route path="/payment" element={<Payment/>} />
         </Routes>

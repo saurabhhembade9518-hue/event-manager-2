@@ -1,132 +1,179 @@
-import React, { useState, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 export const Payment = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { event, formData } = location.state || {};
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
-  const [uploadedScreenshot, setUploadedScreenshot] = useState(null);
-  const receiptRef = useRef();
+  const [razorpayKey, setRazorpayKey] = useState("");
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [receiptDetails, setReceiptDetails] = useState(null);
+
+  const amount = 1 * 100; // in paise
+
+  useEffect(() => {
+    fetch("http://localhost:5000/get-razorpay-key")
+      .then((res) => res.json())
+      .then((data) => setRazorpayKey(data.key))
+      .catch(() => toast.error("Failed to load Razorpay key"));
+  }, []);
 
   if (!event || !formData) {
     return <p className="text-center mt-10">No payment data found.</p>;
   }
 
-  const qrImageUrl =
-    "https://media.licdn.com/dms/image/v2/D4D22AQExj539MOOSoQ/feedshare-shrink_2048_1536/feedshare-shrink_2048_1536/0/1715233337237?e=2147483647&v=beta&t=Hj0ywev9p55jABZrDxgBVB5a6sYiJ1OxgbrgMnynD2c";
-  const logoUrl = "https://engg.dypvp.edu.in/images/DIT-logo-new-second-2.png";
-  const amount = 500;
+  const loadRazorpayScript = (src) =>
+    new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
 
-  const handlePaymentComplete = () => {
-    setPaymentCompleted(true);
+  const generateReceipt = (details) => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(20);
+    doc.setTextColor("#333");
+    doc.text("DYPDPU Event Receipt", 105, 20, null, null, "center");
+
+    doc.setLineWidth(0.5);
+    doc.line(20, 25, 190, 25);
+
+    doc.setFontSize(12);
+    doc.setTextColor("#000");
+
+    const info = [
+      ["Name", details.name],
+      ["Email", details.email],
+      ["Phone", details.phone],
+      ["Event", details.eventTitle],
+      ["Amount Paid", `₹${details.amount}`],
+      ["Payment ID", details.paymentId],
+      ["Order ID", details.orderId],
+      ["Date", new Date().toLocaleString()],
+    ];
+
+    let startY = 35;
+    info.forEach(([label, value]) => {
+      doc.setFont(undefined, "bold");
+      doc.text(`${label}:`, 20, startY);
+      doc.setFont(undefined, "normal");
+      doc.text(`${value}`, 70, startY);
+      startY += 10;
+    });
+
+    doc.setFontSize(10);
+    doc.setTextColor("#555");
+    doc.text("Thank you for your payment!", 105, startY + 10, null, null, "center");
+
+    doc.save(`Receipt_${details.name}.pdf`);
   };
 
-  const handleScreenshotUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setUploadedScreenshot(url);
-      toast.success("Payment screenshot uploaded successfully!"); // Only toast here
+  const handlePayment = async () => {
+    const res = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js");
+    if (!res) {
+      toast.error("Razorpay SDK failed to load. Check your connection.");
+      return;
+    }
+
+    try {
+      const orderResponse = await fetch("http://localhost:5000/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
+      });
+
+      const { order } = await orderResponse.json();
+
+      const options = {
+        key: razorpayKey,
+        amount: order.amount,
+        currency: order.currency,
+        name: "DY Patil Engineering",
+        description: `Payment for ${event.title}`,
+        order_id: order.id,
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        handler: async function (response) {
+          const verifyResponse = await fetch("http://localhost:5000/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(response),
+          });
+
+          const verifyResult = await verifyResponse.json();
+
+          if (verifyResult.valid) {
+            toast.success("Payment successful! 🎉");
+
+            const details = {
+              name: formData.name,
+              email: formData.email,
+              phone: formData.phone,
+              eventTitle: event.title,
+              amount: order.amount / 100,
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+            };
+
+            setReceiptDetails(details);
+            setPaymentSuccess(true);
+          } else {
+            toast.error("Payment verification failed!");
+          }
+        },
+        theme: { color: "#3399cc" },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+    } catch (err) {
+      console.error(err);
+      toast.error("Payment initiation failed.");
     }
   };
 
-  const handleDownloadReceipt = async () => {
-    if (receiptRef.current) {
-      const canvas = await html2canvas(receiptRef.current, { scale: 2 });
-      const dataUrl = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = `${event.title}_PaymentReceipt.png`;
-      link.click();
-    }
+  const downloadReceipt = () => {
+    if (receiptDetails) generateReceipt(receiptDetails);
   };
 
   return (
     <div className="max-w-md mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg text-center">
-      <h2 className="text-2xl font-bold mb-4">Payment for {event.title}</h2>
-      <p className="text-lg mb-4">
-        Course Price: <strong>₹{amount}</strong>
-      </p>
+      <h2 className="text-2xl font-bold mb-4">Pay for {event.title}</h2>
+      <p className="text-lg mb-6">Amount: <strong>₹1</strong></p>
 
-      {!paymentCompleted ? (
-        <>
-          <img
-            src={qrImageUrl}
-            alt="Payment QR"
-            className="mx-auto w-48 h-48 object-contain border rounded-lg"
-          />
-          <p className="mt-2 text-gray-600">Scan this QR to pay via UPI</p>
+      {!paymentSuccess && (
+        <button
+          onClick={handlePayment}
+          className="px-6 py-3 w-full bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+          disabled={!razorpayKey}
+        >
+          {razorpayKey ? "Pay with Razorpay" : "Loading..."}
+        </button>
+      )}
 
+      {paymentSuccess && (
+        <div className="flex flex-col items-center gap-4 mt-6">
           <button
-            onClick={handlePaymentComplete}
-            className="mt-6 px-5 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            onClick={() => navigate("/")}
+            className="w-48 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            Payment Done
+            Go to Home
           </button>
-        </>
-      ) : (
-        <>
-          {/* Receipt */}
-          <div
-            ref={receiptRef}
-            className="p-4 bg-gray-50 border rounded-lg mt-4 text-left"
+          <button
+            onClick={downloadReceipt}
+            className="w-48 px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition"
           >
-            <div className="text-center mb-4">
-              <img src={logoUrl} alt="College Logo" className="mx-auto w-24 h-auto" />
-            </div>
-            <h3 className="text-xl font-bold mb-2 text-center">Payment Receipt</h3>
-            <p><strong>Name:</strong> {formData.name}</p>
-            <p><strong>Email:</strong> {formData.email}</p>
-            <p><strong>Phone:</strong> {formData.phone}</p>
-            <p><strong>Course:</strong> {event.title}</p>
-            <p><strong>Amount:</strong> ₹{amount}</p>
-
-            <div className="mt-4 text-center">
-              <p className="mb-2 font-medium">Payment QR Code:</p>
-              <img
-                src={qrImageUrl}
-                alt="Payment QR"
-                className="mx-auto w-32 h-32 border rounded-lg"
-              />
-            </div>
-
-            {uploadedScreenshot && (
-              <div className="mt-4 text-center">
-                <p className="mb-2 font-medium">Uploaded Payment Screenshot:</p>
-                <img
-                  src={uploadedScreenshot}
-                  alt="Uploaded Payment"
-                  className="mx-auto w-48 h-48 border rounded-lg"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Upload screenshot */}
-          <div className="mt-6">
-            <label className="block mb-2 font-medium">
-              Upload your payment screenshot:
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleScreenshotUpload}
-              className="mb-4"
-            />
-          </div>
-
-          {/* Download only after screenshot uploaded */}
-          {uploadedScreenshot && (
-            <button
-              onClick={handleDownloadReceipt}
-              className="mt-4 px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              Download Complete Receipt
-            </button>
-          )}
-        </>
+            Download Receipt
+          </button>
+        </div>
       )}
     </div>
   );

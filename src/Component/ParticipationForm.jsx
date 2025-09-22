@@ -50,19 +50,7 @@ export const ParticipationForm = ({ event, onParticipated }) => {
         className="px-4 py-2 border rounded-lg"
         required
       />
-      <select
-        name="payment"
-        value={formData.payment}
-        onChange={handleChange}
-        className="px-4 py-2 border rounded-lg"
-        required
-      >
-        <option value="UPI">UPI</option>
-        <option value="Credit Card">Credit Card</option>
-        <option value="Debit Card">Debit Card</option>
-        <option value="Net Banking">Net Banking</option>
-        <option value="Wallet">Wallet</option>
-      </select>
+     
 
       <button
         type="button"
