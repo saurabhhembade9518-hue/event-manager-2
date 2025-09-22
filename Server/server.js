@@ -21,9 +21,9 @@ const razorpay = new Razorpay({
 });
 
 // API: Get Razorpay key for frontend
-app.get("/get-razorpay-key", (req, res) => {
-  res.json({ key: RAZORPAY_KEY_ID });
-});
+app.get("/", (req, res) => {
+    res.send("Backend is running");
+  });
 
 // API: Create order
 app.post("/create-order", async (req, res) => {
