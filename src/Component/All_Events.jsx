@@ -1,0 +1,55 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import { clubs } from "../data";
+import toast from "react-hot-toast";
+
+export const AllEvents = () => {
+  const allEvents = clubs.flatMap((club) =>
+    club.events.map((event) => ({ ...event, clubName: club.name }))
+  );
+
+  return (
+    <div className="p-8 max-w-6xl mx-auto">
+      <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-900">
+        All Events
+      </h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {allEvents.map((event) => (
+          <div
+            key={event.id}
+            className="bg-white border rounded-2xl shadow-md hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col justify-between"
+          >
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                {event.title}
+              </h2>
+              <p className="text-sm text-gray-500 mb-2">
+                📅 {event.date} &nbsp; | &nbsp; 📍 {event.location}
+              </p>
+              <p className="text-gray-500 mb-4 text-sm italic">
+                Club: {event.clubName}
+              </p>
+              <p className="text-gray-600 mb-4">{event.description}</p>
+            </div>
+
+            <div className="mt-auto flex gap-2">
+              <Link
+                to={`/card_details/${event.id}`}
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium text-center hover:bg-blue-700 transition"
+              >
+                View Details →
+              </Link>
+              <button
+                onClick={() => toast.success(`Participated in ${event.title}`)}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition"
+              >
+                Participate
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
