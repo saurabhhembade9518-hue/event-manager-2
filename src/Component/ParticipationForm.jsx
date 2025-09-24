@@ -16,13 +16,13 @@ export const ParticipationForm = ({ event, onParticipated }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePayClick = () => {
-    // Redirect to payment page and send data
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
     navigate("/payment", { state: { event, formData } });
   };
 
   return (
-    <div className="mt-6 flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
       <input
         type="text"
         name="name"
@@ -51,15 +51,14 @@ export const ParticipationForm = ({ event, onParticipated }) => {
         required
       />
 
-<div className="flex justify-center">
-    <button
-      type="button"
-      onClick={handlePayClick}
-      className="w-44 py-3 rounded-lg text-white bg-green-600 hover:bg-green-700 font-medium transition mt-4"
-    >
-      Pay
-    </button>
-  </div>
-    </div>
+      <div className="flex justify-center">
+        <button
+          type="submit"
+          className="w-44 py-3 rounded-lg text-white bg-green-600 hover:bg-green-700 font-medium transition mt-4"
+        >
+          Pay
+        </button>
+      </div>
+    </form>
   );
 };
