@@ -29,7 +29,7 @@ export const ParticipationForm = ({ event, onParticipated }) => {
         value={formData.name}
         onChange={handleChange}
         placeholder="Your Name"
-        className="px-4 py-2 border rounded-lg"
+        className="px-4 py-2 border rounded-lg bg-gray-900 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
       <input
@@ -38,7 +38,7 @@ export const ParticipationForm = ({ event, onParticipated }) => {
         value={formData.email}
         onChange={handleChange}
         placeholder="Your Email"
-        className="px-4 py-2 border rounded-lg"
+        className="px-4 py-2 border rounded-lg bg-gray-900 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
       <input
@@ -47,18 +47,19 @@ export const ParticipationForm = ({ event, onParticipated }) => {
         value={formData.phone}
         onChange={handleChange}
         placeholder="Phone Number"
-        className="px-4 py-2 border rounded-lg"
+        className="px-4 py-2 border rounded-lg bg-gray-900 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
-     
 
-      <button
-        type="button"
-        onClick={handlePayClick}
-        className="px-5 py-3 rounded-lg text-white bg-green-600 hover:bg-green-700 font-medium transition"
-      >
-        Pay
-      </button>
+<div className="flex justify-center">
+    <button
+      type="button"
+      onClick={handlePayClick}
+      className="w-44 py-3 rounded-lg text-white bg-green-600 hover:bg-green-700 font-medium transition mt-4"
+    >
+      Pay
+    </button>
+  </div>
     </div>
   );
 };

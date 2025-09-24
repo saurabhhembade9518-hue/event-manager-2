@@ -13,7 +13,11 @@ export const CardDetails = () => {
   const [participated, setParticipated] = useState(false);
 
   if (!event) {
-    return <h2 className="text-center text-xl mt-10">Event not found</h2>;
+    return (
+      <h2 className="text-center text-2xl mt-16 font-semibold text-red-600">
+        ⚠️ Event not found
+      </h2>
+    );
   }
 
   const handleParticipateClick = () => {
@@ -26,36 +30,74 @@ export const CardDetails = () => {
   };
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-10">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-6">
+    <div className="min-h-screen bg-black text-white px-4 py-10 relative overflow-hidden">
+      {/* Slightly blueish animated glow background */}
+      <div
+        className="absolute inset-0
+          bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900
+          bg-[length:200%_200%] bg-[position:0%_50%]
+          animate-sky-glow opacity-20 blur-3xl pointer-events-none z-0"
+      />
+
+      <div
+        className="max-w-3xl mx-auto relative z-10 bg-[#111827] rounded-3xl border border-blue-900 p-10
+          transition duration-300 ease-in-out outline-none
+          hover:ring-2 hover:ring-pink-500 hover:ring-opacity-40
+          opacity-0 animate-fade-in-up text-blue-300"
+      >
+        {/* Title */}
+        <h1 className="text-4xl font-extrabold mb-6 tracking-tight text-blue-400">
           {event.title}
         </h1>
 
+        {/* Date + Location */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
-          <span className="text-gray-700 bg-gray-100 px-4 py-2 rounded-full text-sm font-medium">
+          <span className="inline-flex items-center gap-2 text-blue-300 bg-blue-900/20 px-4 py-2 rounded-full text-sm font-medium shadow-sm">
             📅 {event.date}
           </span>
-          <span className="text-gray-700 bg-gray-100 px-4 py-2 rounded-full text-sm font-medium">
+          <span className="inline-flex items-center gap-2 text-blue-300 bg-blue-900/20 px-4 py-2 rounded-full text-sm font-medium shadow-sm">
             📍 {event.location}
           </span>
         </div>
 
-        <p className="text-lg text-gray-700 leading-relaxed">
-          {event.description}
+        {/* Description */}
+        <p className="text-lg leading-relaxed mb-6">{event.description}</p>
+
+        {/* Entry Fee */}
+        <p className="text-lg font-semibold mb-4">
+          Entry Fee: <span className="text-blue-400">{event.entryFee}</span>
         </p>
 
+        {/* Benefits */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-2 text-blue-500">Benefits</h2>
+          <p className="text-blue-300">{event.benefits}</p>
+        </div>
+
+        {/* Cash Prizes */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4 text-blue-500">Cash Prizes</h2>
+          <ul className="list-disc list-inside space-y-1 text-blue-300">
+            {event.prizes.map((prize, idx) => (
+              <li key={idx}>
+                <span className="font-semibold">{prize.position}:</span> {prize.amount}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Button / Form */}
         {!showForm ? (
           <button
             onClick={handleParticipateClick}
             disabled={participated}
-            className={`px-5 py-3 mt-6 rounded-lg text-white font-medium transition ${
+            className={`px-6 py-3 mt-4 rounded-xl text-white font-semibold text-lg shadow-md transition-transform transform hover:scale-105 ${
               participated
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-green-600 hover:bg-green-700"
+                ? "bg-gray-600 cursor-not-allowed"
+                : "bg-gradient-to-r from-blue-700 to-blue-900 hover:from-blue-900 hover:to-blue-700"
             }`}
           >
-            {participated ? "Participated ✅" : "Participate"}
+            {participated ? "✅ Participated" : "🚀 Participate Now"}
           </button>
         ) : (
           <ParticipationForm

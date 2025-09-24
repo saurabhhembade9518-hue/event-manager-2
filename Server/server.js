@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config(); 
 const express = require("express");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
@@ -21,9 +21,9 @@ const razorpay = new Razorpay({
 });
 
 // API: Get Razorpay key for frontend
-app.get("/", (req, res) => {
-    res.send("Backend is running");
-  });
+app.get("/get-razorpay-key", (req, res) => {
+  res.json({ key: process.env.RAZORPAY_KEY_ID });
+});
 
 // API: Create order
 app.post("/create-order", async (req, res) => {

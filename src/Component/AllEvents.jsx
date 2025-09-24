@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { clubs } from "../data";
-import toast from "react-hot-toast";
 
 export const AllEvents = () => {
   const allEvents = clubs.flatMap((club) =>
@@ -9,46 +8,59 @@ export const AllEvents = () => {
   );
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-900">
-        All Events
-      </h1>
+    <div className="min-h-screen bg-[#0a0a0a] text-white px-6 py-20 relative overflow-hidden">
+      {/* Animated background */}
+      <div
+        className="absolute inset-0
+          bg-gradient-to-r from-purple-600 via-teal-400 to-indigo-500
+          bg-[length:200%_200%] bg-[position:0%_50%]
+          animate-sky-glow opacity-20 blur-3xl pointer-events-none z-0"
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {allEvents.map((event) => (
-          <div
-            key={event.id}
-            className="bg-white border rounded-2xl shadow-md hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col justify-between"
-          >
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                {event.title}
-              </h2>
-              <p className="text-sm text-gray-500 mb-2">
-                📅 {event.date} &nbsp; | &nbsp; 📍 {event.location}
-              </p>
-              <p className="text-gray-500 mb-4 text-sm italic">
-                Club: {event.clubName}
-              </p>
-              <p className="text-gray-600 mb-4">{event.description}</p>
-            </div>
+      <div className="max-w-6xl mx-auto relative z-10">
+        <h1 className="text-4xl md:text-5xl font-extrabold mb-14 text-center text-teal-300 animate-fade-in-down">
+          All Events
+        </h1>
 
-            <div className="mt-auto flex gap-2">
-              <Link
-                to={`/card_details/${event.id}`}
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium text-center hover:bg-blue-700 transition"
-              >
-                View Details →
-              </Link>
-              <button
-                onClick={() => toast.success(`Participated in ${event.title}`)}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition"
-              >
-                Participate
-              </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {allEvents.map((event, index) => (
+            <div
+              key={event.id}
+              className={`bg-white/5 backdrop-blur-md 
+                border border-purple-700 hover:border-teal-400 
+                text-white rounded-2xl shadow-lg 
+                hover:shadow-xl p-6 transition-all duration-300
+                transform hover:scale-105 flex flex-col justify-between
+                opacity-0 animate-fade-in-up`}
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div>
+                <h2 className="text-2xl font-bold text-teal-300 mb-2">
+                  {event.title}
+                </h2>
+                <p className="text-gray-400 text-sm mb-2">
+                  📅 {event.date} &nbsp; | &nbsp; 📍 {event.location}
+                </p>
+                <p className="text-gray-400 mb-4 text-sm italic">
+                  Club: {event.clubName}
+                </p>
+                <p className="text-gray-300 mb-4 text-sm">{event.description}</p>
+              </div>
+
+              {/* Blue button in center */}
+              <div className="mt-auto flex justify-center">
+                <Link
+                  to={`/card_details/${event.id}`}
+                  className="bg-blue-600 hover:bg-blue-800
+                    text-white px-6 py-2 rounded-lg text-sm font-semibold
+                    text-center transition duration-300 w-full max-w-xs"
+                >
+                  View Details →
+                </Link>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
