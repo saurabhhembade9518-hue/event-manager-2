@@ -7,6 +7,10 @@ import { Events } from "./Component/Events";
 import { CardDetails } from "./Component/CardDetails";
 import { AllEvents } from "./Component/AllEvents";
 import {Payment} from "./Component/Payment"; 
+import Login from "./Component/Login"; 
+import Profile from "./Component/Profile"; 
+import Signup from "./Component/Signup";
+
 
 const App = () => {
   return (
@@ -19,6 +23,9 @@ const App = () => {
           <Route path="/card_details/:eventId" element={<CardDetails />} />
           <Route path="/events" element= {<AllEvents/>}/>
           <Route path="/payment" element={<Payment/>} />
+          <Route path="/login" element={<Login/>}/> 
+          <Route path="/profile" element= {<Profile/>} />
+          <Route path="/signUp" element= {<Signup/>} />
         </Routes>
       </div>
      
